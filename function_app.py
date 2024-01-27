@@ -64,16 +64,43 @@ def timer_trigger(myTimer: func.TimerRequest) -> None:
 
     master_df = processData(df_server1, df_server2, df_server3)
 
-    DB_Last = get_last_time()
-    Server_Last = master_df["Time"].iloc[-1]
+    uploadData(master_df)
 
-    if DB_Last < Server_Last:
-        print("DB_Last: " + str(DB_Last))
-        print("Server_Last: " + str(Server_Last))
-        print("New data to upload!!!")
-    elif DB_Last == Server_Last:
-        print("DB_Last: " + str(DB_Last))
-        print("Server_Last: " + str(Server_Last))
+
+def uploadData(master_df):
+    DB_Last_time = get_last_time()
+    Server_Last_time = master_df["Time"].iloc[-1]
+
+    row = master_df.iloc[-1]
+
+    if DB_Last_time < Server_Last_time:
+        print("DB_Last: " + str(DB_Last_time))
+        print("Server_Last: " + str(Server_Last_time))
+        print("Uploading new data to DB")
+        with get_conn() as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute(
+                    f"INSERT INTO resTest1 (dateTime, First_Floor, Second_Floor, Third_Floor, Fourth_Floor, Utilities, TOTAL, First_Floor_Kwh, Second_Floor_Kwh, Third_Floor_Kwh, Fourth_Floor_Kwh, Utilities_Kwh, TOTAL_Kwh) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    row["Time"],
+                    row["1st_Floor"],
+                    row["2nd_Floor"],
+                    row["3rd_Floor"],
+                    row["4th_Floor"],
+                    row["Utilities"],
+                    row["Total"],
+                    row["1st_Floor_Kwh"],
+                    row["2nd_Floor_Kwh"],
+                    row["3rd_Floor_Kwh"],
+                    row["4th_Floor_Kwh"],
+                    row["Utilities_Kwh"],
+                    row["Total_Kwh"],
+                )
+            except Exception as e:
+                print("Error executing SQL statement: {}".format(e))
+    elif DB_Last_time == Server_Last_time:
+        print("DB_Last: " + str(DB_Last_time))
+        print("Server_Last: " + str(Server_Last_time))
         print("No new data to upload")
 
 
