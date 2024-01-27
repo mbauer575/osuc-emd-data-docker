@@ -8,12 +8,11 @@ import time
 import json
 from datetime import datetime
 import pandas as pd
-import pyodbc
+import pyodbc, struct
 from azure.identity import DefaultAzureCredential
 import pysftp
 from io import BytesIO
 from dotenv import load_dotenv
-import numpy as np
 
 app = func.FunctionApp()
 
@@ -64,6 +63,52 @@ def timer_trigger(myTimer: func.TimerRequest) -> None:
         logging.warning("Data checks passed after correction")
 
     master_df = processData(df_server1, df_server2, df_server3)
+
+    DB_Last = get_last_time()
+    Server_Last = master_df["Time"].iloc[-1]
+
+    if DB_Last < Server_Last:
+        print("DB_Last: " + str(DB_Last))
+        print("Server_Last: " + str(Server_Last))
+        print("New data to upload!!!")
+    elif DB_Last == Server_Last:
+        print("DB_Last: " + str(DB_Last))
+        print("Server_Last: " + str(Server_Last))
+        print("No new data to upload")
+
+
+def get_last_time():
+    with get_conn() as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT TOP 1 * FROM resTest1 ORDER BY dateTime DESC")
+        rows = cursor.fetchall()
+        return rows[0][0]
+
+
+def get_conn():
+    connection_string = (
+        "Driver={ODBC Driver 18 for SQL Server};"
+        "Server=tcp:sql-engr-cem-db.database.windows.net,1433;"
+        "Database=sqldb-engr-cem-db;"
+        "Encrypt=yes;"
+        "TrustServerCertificate=no;"
+        "Connection Timeout=30;"
+    )
+    credential = DefaultAzureCredential()
+
+    # Get an access token for the Azure SQL Database
+    token_bytes = credential.get_token("https://database.windows.net/").token.encode(
+        "UTF-16-LE"
+    )
+
+    token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
+    SQL_COPT_SS_ACCESS_TOKEN = 1256
+    # Connect to the Azure SQL Database
+    conn = pyodbc.connect(
+        connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+    )
+
+    return conn
 
 
 def processData(df_server1, df_server2, df_server3):
@@ -155,7 +200,8 @@ def cleanData(df):
 def CheckResData(df_server1, df_server2, df_server3):
     # test 1 - check if all dataframes are the same length
     if len(df_server1) != len(df_server2) or len(df_server1) != len(df_server3):
-        print("Dataframes are not the same length attempting to fix... - check logs")
+        print("Dataframes are not the same length attempting to fix...")
+        logging.warning("Dataframes are not the same length attempting to fix...")
         # Get the latest time that is common to all three dataframes
         latest_common_time = min(
             df_server1.index.max(), df_server2.index.max(), df_server3.index.max()
@@ -175,6 +221,8 @@ def CheckResData(df_server1, df_server2, df_server3):
             logging.error("Length of df_server3: " + str(len(df_server3)))
             return False
         else:
+            logging.warning("Fixed! Dataframes are now the same length")
+            print("Fixed! Dataframes are now the same length")
             return df_server1, df_server2, df_server3
 
     # test 2 - check if all dataframes have the same time stamps
