@@ -105,15 +105,15 @@ def get_last_time():
 
 def get_conn():
     connection_string = os.getenv("SQL_CONNECTION_STRING")
-    credential = DefaultAzureCredential()
+    # credential = DefaultAzureCredential()
 
     # Get an access token for the Azure SQL Database
-    token_bytes = credential.get_token("https://database.windows.net/").token.encode(
-        "UTF-16-LE"
-    )
+    #token_bytes = credential.get_token("https://database.windows.net/").token.encode(
+    #   "UTF-16-LE"
+    #)
 
-    token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
-    SQL_COPT_SS_ACCESS_TOKEN = 1256
+    # token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
+    # SQL_COPT_SS_ACCESS_TOKEN = 1256
     # Connect to the Azure SQL Database
     conn = pyodbc.connect(connection_string) 
 
