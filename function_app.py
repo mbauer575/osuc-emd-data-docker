@@ -115,9 +115,7 @@ def get_conn():
     token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
     SQL_COPT_SS_ACCESS_TOKEN = 1256
     # Connect to the Azure SQL Database
-    conn = pyodbc.connect(
-        connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
-    )
+    conn = pyodbc.connect(connection_string) 
 
     return conn
 
