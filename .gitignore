@@ -46,3 +46,23 @@ __pycache__/
 __blobstorage__
 __queuestorage__
 __azurite_db*__.json
+
+# Directories
+.DS_Store
+*/.DS_Store
+*/.vscode
+*/.idea
+*/.vs
+*/.suo
+*/.user
+*/.cache
+*/.vscode-test
+*/.pytest_cache
+*/.pytest_cache/*
+*/.cache/*
+*/.cache
+*/.coverage
+*/.coverage.*
+*/.coverage/*
+*/.coverage
+*/.coverage.*

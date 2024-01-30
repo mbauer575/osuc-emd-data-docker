@@ -1,11 +1,17 @@
-# To enable ssh & remote debugging on app service change the base image to the one below
-# FROM mcr.microsoft.com/azure-functions/python:4-python3.10-appservice
-FROM mcr.microsoft.com/azure-functions/python:4-python3.10
-
-ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
-    AzureFunctionsJobHost__Logging__Console__IsEnabled=true
+FROM python:3.10-slim-buster
 
 COPY requirements.txt /
-RUN pip install -r /requirements.txt
 
-COPY . /home/site/wwwroot
+# Set the working directory in the container to /app
+WORKDIR /app
+
+# Add the current directory contents into the container at /app
+ADD . /app
+
+# Install unixODBC
+RUN apt-get update && apt-get install -y unixodbc-dev
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["python", "function_app.py"]

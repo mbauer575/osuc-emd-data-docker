@@ -1,4 +1,3 @@
-import azure.functions as func
 import datetime
 import json
 import logging
@@ -13,18 +12,10 @@ from azure.identity import DefaultAzureCredential
 import pysftp
 from io import BytesIO
 from dotenv import load_dotenv
+import pytz
 
-app = func.FunctionApp()
 
-
-@app.timer_trigger(
-    schedule="0 */5 * * * *", arg_name="myTimer", run_on_startup=True, use_monitor=False
-)
-def timer_trigger(myTimer: func.TimerRequest) -> None:
-    if myTimer.past_due:
-        logging.info("The timer is past due!")
-
-    logging.info("Python timer trigger function executed.")
+def main():
     load_dotenv()
     # Get the environment variables
 
@@ -113,14 +104,7 @@ def get_last_time():
 
 
 def get_conn():
-    connection_string = (
-        "Driver={ODBC Driver 18 for SQL Server};"
-        "Server=tcp:sql-engr-cem-db.database.windows.net,1433;"
-        "Database=sqldb-engr-cem-db;"
-        "Encrypt=yes;"
-        "TrustServerCertificate=no;"
-        "Connection Timeout=30;"
-    )
+    connection_string = os.getenv("SQL_CONNECTION_STRING")
     credential = DefaultAzureCredential()
 
     # Get an access token for the Azure SQL Database
@@ -270,9 +254,9 @@ def CheckResData(df_server1, df_server2, df_server3):
 
 
 def pullData(FTP_HOST, FTP_USER, FTP_PASS, SERVER_NUM):
-    now = datetime.now()
+    my_tz = pytz.timezone("US/Pacific")
+    now = datetime.now(my_tz)
     Fdate = now.strftime("%Y%m%d")
-
     logging.info(
         "[DOWNLOAD_INFO]  Attempting to download" + str(SERVER_NUM) + " at " + str(now)
     )
@@ -298,3 +282,6 @@ def pullData(FTP_HOST, FTP_USER, FTP_PASS, SERVER_NUM):
             logging.info("[DOWNLOAD_INFO]  Download successful")
 
     return df
+
+
+main()
