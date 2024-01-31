@@ -96,6 +96,7 @@ def uploadData(master_df):
 
 
 def get_last_time():
+    logging("Getting last time from DB")
     with get_conn() as conn:
         cursor = conn.cursor()
         cursor.execute(f"SELECT TOP 1 * FROM resTest1 ORDER BY dateTime DESC")
@@ -108,14 +109,14 @@ def get_conn():
     # credential = DefaultAzureCredential()
 
     # Get an access token for the Azure SQL Database
-    #token_bytes = credential.get_token("https://database.windows.net/").token.encode(
+    # token_bytes = credential.get_token("https://database.windows.net/").token.encode(
     #   "UTF-16-LE"
-    #)
+    # )
 
     # token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
     # SQL_COPT_SS_ACCESS_TOKEN = 1256
     # Connect to the Azure SQL Database
-    conn = pyodbc.connect(connection_string) 
+    conn = pyodbc.connect(connection_string)
 
     return conn
 
