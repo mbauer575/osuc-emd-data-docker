@@ -64,7 +64,7 @@ def uploadData(master_df):
 
     row = master_df.iloc[-1]
 
-    if DB_Last_time < Server_Last_time:
+    if DB_Last_time == None or DB_Last_time < Server_Last_time:
         print("DB_Last: " + str(DB_Last_time))
         print("Server_Last: " + str(Server_Last_time))
         print("Uploading new data to DB")
@@ -96,15 +96,20 @@ def uploadData(master_df):
 
 
 def get_last_time():
-    logging.info("Getting last time from DB")
     with get_conn() as conn:
         cursor = conn.cursor()
+        logging.info("Getting last time from DB")
         cursor.execute(f"SELECT TOP 1 * FROM resTest1 ORDER BY dateTime DESC")
         rows = cursor.fetchall()
+        if len(rows) == 0:
+            logging.warning("database is empty")
+            return None
         return rows[0][0]
 
 
 def get_conn():
+    print("Getting connection to database")
+    load_dotenv()
     connection_string = os.getenv("SQL_CONNECTION_STRING")
     # credential = DefaultAzureCredential()
 
@@ -257,10 +262,16 @@ def pullData(FTP_HOST, FTP_USER, FTP_PASS, SERVER_NUM):
     now = datetime.now(my_tz)
     Fdate = now.strftime("%Y%m%d")
     logging.info(
-        "[DOWNLOAD_INFO]  Attempting to download" + str(SERVER_NUM) + " at " + str(now)
+        "[DOWNLOAD_INFO]  Attempting to download from server:"
+        + str(SERVER_NUM)
+        + " at "
+        + str(now)
     )
     print(
-        "[DOWNLOAD_INFO]  Attempting to download" + str(SERVER_NUM) + " at " + str(now)
+        "[DOWNLOAD_INFO]  Attempting to download from server:"
+        + str(SERVER_NUM)
+        + " at "
+        + str(now)
     )
 
     cnopts = pysftp.CnOpts()
