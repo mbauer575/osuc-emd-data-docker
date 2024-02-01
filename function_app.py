@@ -94,11 +94,17 @@ def uploadData(master_df):
         print("Server_Last: " + str(Server_Last_time))
         print("No new data to upload")
 
+    else:
+        print("DB_Last: " + str(DB_Last_time))
+        print("Server_Last: " + str(Server_Last_time))
+        print("Server data is older than DB data, exiting...")
+
 
 def get_last_time():
     with get_conn() as conn:
         cursor = conn.cursor()
         logging.info("Getting last time from DB")
+        print("Getting last time from DB")
         cursor.execute(f"SELECT TOP 1 * FROM resTest1 ORDER BY dateTime DESC")
         rows = cursor.fetchall()
         if len(rows) == 0:
@@ -122,7 +128,7 @@ def get_conn():
     # SQL_COPT_SS_ACCESS_TOKEN = 1256
     # Connect to the Azure SQL Database
     conn = pyodbc.connect(connection_string)
-
+    print("Connected to database")
     return conn
 
 
