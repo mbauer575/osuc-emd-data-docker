@@ -96,7 +96,7 @@ def uploadData(master_df):
 
 
 def get_last_time():
-    logging("Getting last time from DB")
+    logging.info("Getting last time from DB")
     with get_conn() as conn:
         cursor = conn.cursor()
         cursor.execute(f"SELECT TOP 1 * FROM resTest1 ORDER BY dateTime DESC")
@@ -186,7 +186,7 @@ def cleanData(df):
     df = df.dropna(axis=0, how="all")
 
     # Correct duplicate time stamps
-    df["Time"] = pd.to_datetime(df["Time"])
+    df["Time"] = pd.to_datetime(df["Date"] + " " + df["Time"])
     df = df.sort_values("Time")
 
     # Check if there are any duplicate time stamps
