@@ -61,7 +61,8 @@ def main():
 def uploadData(master_df):
     DB_Last_time = get_last_time()
     Server_Last_time = master_df["Time"].iloc[-1]
-
+    load_dotenv()
+    table = os.getenv("SQL_TABLE")
     row = master_df.iloc[-1]
 
     if DB_Last_time == None or DB_Last_time < Server_Last_time:
@@ -72,7 +73,7 @@ def uploadData(master_df):
             cursor = conn.cursor()
             try:
                 cursor.execute(
-                    f"INSERT INTO resTest1 (dateTime, First_Floor, Second_Floor, Third_Floor, Fourth_Floor, Utilities, TOTAL, First_Floor_Kwh, Second_Floor_Kwh, Third_Floor_Kwh, Fourth_Floor_Kwh, Utilities_Kwh, TOTAL_Kwh) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    f"INSERT INTO {table} (dateTime, First_Floor, Second_Floor, Third_Floor, Fourth_Floor, Utilities, TOTAL, First_Floor_Kwh, Second_Floor_Kwh, Third_Floor_Kwh, Fourth_Floor_Kwh, Utilities_Kwh, TOTAL_Kwh) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     row["Time"],
                     row["1st_Floor"],
                     row["2nd_Floor"],
@@ -103,9 +104,11 @@ def uploadData(master_df):
 def get_last_time():
     with get_conn() as conn:
         cursor = conn.cursor()
+        load_dotenv()
+        table = os.getenv("SQL_TABLE")
         logging.info("Getting last time from DB")
         print("Getting last time from DB")
-        cursor.execute(f"SELECT TOP 1 * FROM resTest1 ORDER BY dateTime DESC")
+        cursor.execute(f"SELECT TOP 1 * FROM {table} ORDER BY dateTime DESC")
         rows = cursor.fetchall()
         if len(rows) == 0:
             logging.warning("database is empty")
