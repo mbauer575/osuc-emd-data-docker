@@ -214,6 +214,12 @@ def cleanData(df):
         # Merge the new dataframe with the old one, this will correct the duplicate time stamps
         df = new_df.merge(df, left_index=True, right_on="Time", how="left")
 
+    # Convert all negative values to positive
+    df = df.abs()
+
+    # Round all values to 2 decimal places
+    df = df.round(2)
+
     return df
 
 
