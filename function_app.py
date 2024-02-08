@@ -64,10 +64,10 @@ def uploadData(master_df):
     load_dotenv()
     table = os.getenv("SQL_TABLE")
     row = master_df.iloc[-1]
+    print("DB_Last: " + str(DB_Last_time))
+    print("Server_Last: " + str(Server_Last_time))
 
     if DB_Last_time == None or DB_Last_time < Server_Last_time:
-        print("DB_Last: " + str(DB_Last_time))
-        print("Server_Last: " + str(Server_Last_time))
         print("Uploading new data to DB")
         with get_conn() as conn:
             cursor = conn.cursor()
@@ -91,13 +91,9 @@ def uploadData(master_df):
             except Exception as e:
                 print("Error executing SQL statement: {}".format(e))
     elif DB_Last_time == Server_Last_time:
-        print("DB_Last: " + str(DB_Last_time))
-        print("Server_Last: " + str(Server_Last_time))
         print("No new data to upload")
 
     else:
-        print("DB_Last: " + str(DB_Last_time))
-        print("Server_Last: " + str(Server_Last_time))
         print("Server data is older than DB data, exiting...")
 
 
@@ -113,7 +109,7 @@ def get_last_time():
         if len(rows) == 0:
             logging.warning("database is empty")
             return None
-        return rows[0][0]
+        return rows[0][1]
 
 
 def get_conn():
