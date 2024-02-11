@@ -20,7 +20,7 @@ import argparse
 
 def main():
     # Get the environment variables
-    # load_dotenv()
+    load_dotenv()
     table = os.getenv("TABLE_NAME")
 
     # ask the user what they want to do
@@ -62,23 +62,37 @@ def add_new_data():
         end_date,
     )
 
-    # df_server2 = get_data_from_range(
-    #     os.getenv("FTP_HOST_2"),
-    #     os.getenv("FTP_USER_2"),
-    #     os.getenv("FTP_PASS_2"),
-    #     start_date,
-    #     end_date,
-    # )
-    # df_server3 = get_data_from_range(
-    #     os.getenv("FTP_HOST_3"),
-    #     os.getenv("FTP_USER_3"),
-    #     os.getenv("FTP_PASS_3"),
-    #     start_date,
-    #     end_date,
-    # )
+    df_server2 = get_data_from_range(
+        os.getenv("FTP_HOST_2"),
+        os.getenv("FTP_USER_2"),
+        os.getenv("FTP_PASS_2"),
+        start_date,
+        end_date,
+    )
+    df_server3 = get_data_from_range(
+        os.getenv("FTP_HOST_3"),
+        os.getenv("FTP_USER_3"),
+        os.getenv("FTP_PASS_3"),
+        start_date,
+        end_date,
+    )
+    df_server1 = cleanData(df_server1)
+    df_server2 = cleanData(df_server2)
+    df_server3 = cleanData(df_server3)
+    dataval = CheckResData(df_server1, df_server2, df_server3)
 
-    # Save df_server1 to a .csv file
-    df_server1.to_csv("df_server1.csv", index=False)
+    if dataval is True:
+        logging.info("Data checkes passed")
+    elif dataval is False:
+        logging.error("Data checks failed")
+        return
+    else:
+        df_server1, df_server2, df_server3 = dataval
+        logging.warning("Data checks passed after correction")
+
+    master_df = processData(df_server1, df_server2, df_server3)
+
+    # print master_df to a csv for testing
 
 
 main()

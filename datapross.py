@@ -13,6 +13,7 @@ import sys
 import time
 import json
 from datetime import datetime
+from datetime import timedelta
 import pandas as pd
 import pyodbc, struct
 from azure.identity import DefaultAzureCredential
@@ -294,7 +295,7 @@ def get_data_from_range(FTP_HOST, FTP_USER, FTP_PASS, start, end):
         sftp.chdir("trend")
         print("Attempting to download data from range:" + start + " to " + end)
         for i in range(days_between + 1):
-            date = start_date + datetime.timedelta(days=i)
+            date = start_date + timedelta(days=i)
             Fdate = date.strftime("%Y%m%d")
             with BytesIO() as fl:
                 print("Downloading file for:" + Fdate)
@@ -306,7 +307,7 @@ def get_data_from_range(FTP_HOST, FTP_USER, FTP_PASS, start, end):
                 )
                 master_df = pd.concat([master_df, df])
         print("Successfully downloaded data from range")
-        print("there are:" + len(master_df) + " rows")
+        print("there are:" + str(len(master_df)) + " rows")
     return master_df
 
 
